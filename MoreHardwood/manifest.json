@@ -6,5 +6,5 @@
   "UniqueID": "Plastikmensch.MoreHardwood",
   "EntryDll": "MoreHardwood.dll",
   "MinimumApiVersion": "2.10.0",
-  "UpdateKeys": []
+  "UpdateKeys": [ "Github:Plastikmensch/MoreHardwood" ]
 }
