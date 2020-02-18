@@ -1,0 +1,10 @@
+﻿{
+  "Name": "MoreHardwood",
+  "Author": "Plastikmensch",
+  "Version": "1.0.0",
+  "Description": "Logs drop more hardwood",
+  "UniqueID": "Plastikmensch.MoreHardwood",
+  "EntryDll": "MoreHardwood.dll",
+  "MinimumApiVersion": "2.10.0",
+  "UpdateKeys": []
+}
