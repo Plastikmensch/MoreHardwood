@@ -8,6 +8,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using StardewValley.Locations;
 using StardewValley.Tools;
 
 namespace MoreHardwood
@@ -25,6 +26,8 @@ namespace MoreHardwood
 
         /// <summary>Reference to a tree</summary>
         private static Tree tree;
+
+        private static ResourceClump clump;
 
         /// <summary>Array of valid items.</summary>
         private static int[] validItems = new int[700];
@@ -44,7 +47,9 @@ namespace MoreHardwood
             Helper.Events.Input.ButtonPressed += OnButtonPressed;
             Helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             Helper.Events.GameLoop.DayStarted += OnDayStarted;
+            Helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
 
+            /*
             HarmonyInstance harmony = HarmonyInstance.Create(ModManifest.UniqueID);
             //patch resource drops
             harmony.Patch(
@@ -61,6 +66,7 @@ namespace MoreHardwood
             original: AccessTools.Method(typeof(Tree), nameof(Tree.tickUpdate)),
             prefix: new HarmonyMethod(typeof(ModEntry), nameof(ModEntry.tickUpdate_Prefix))
             );
+            */
         }
 
         public void OnDayStarted(object sender, DayStartedEventArgs e)
@@ -229,32 +235,186 @@ namespace MoreHardwood
         /// <param name="e">The event argument</param>
         public void OnButtonPressed (object sender, ButtonPressedEventArgs e)
         {
-            /*
+
             if (!Context.IsPlayerFree) return;
             SButton key = e.Button;
-            if (key.IsUseToolButton())
+            if (key.IsUseToolButton() || (key.IsUseToolButton() && e.IsDown(key)))
             {
                 Tool t = Game1.player.CurrentTool;
-                if (Game1.currentLocation.Name.Equals("Farm")) 
+
+                ModMonitor.Log($"player facing: {Game1.player.facingDirection}");
+                ModMonitor.Log($"player location: {Game1.player.getTileLocation()} tool location: {GetTileInFrontOfPlayer(Game1.player)}");
+
+                if(IsTreeInFrontOfPlayer(Game1.player) && t is Axe)
                 {
-                    ModMonitor.Log("player used tool at farm");
-                }
-                else if(Game1.currentLocation.Name.Equals("Forest"))
-                {
-                    ModMonitor.Log("player used tool at forest");
-                }
-                else if(Game1.currentLocation.Name.Equals("Woods"))
-                {
-                    ModMonitor.Log("player used tool in woods");
+                    ModMonitor.Log("Found Tree");
+                    //growthstages: 6 = full grown (stage 5 wiki), 4 = small tree (stage 4 wiki)
+                    tree = GetTreeInFrontOfPlayer(Game1.player);
+                    //ModMonitor.Log($"Treedata: growstage {tree.growthStage}, type: {tree.treeType}, health: {tree.health}");
                 }
                 else
                 {
-                    ModMonitor.Log($"player used tool in {Game1.currentLocation.Name}");
+                    tree = null;
+                }
+                ModMonitor.Log("player used tool");
+                if(IsClumpInFrontOfPlayer(Game1.player))
+                {
+                    ModMonitor.Log("Found ResourceClump!");
+                }
+                else
+                {
+                    clump = null;
                 }
             }
-            */
+
         }
 
+        public void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
+        {
+            if (!Context.IsPlayerFree) return;
+            //NOTE: Button pressed might not be necessary
+            if(tree != null)
+            {
+                //Tree tree = GetTreeInFrontOfPlayer(Game1.player);
+                //careful: spams a lot
+                bool falling = Helper.Reflection.GetField<NetBool>(tree, "falling").GetValue();
+                bool destroy = Helper.Reflection.GetField<NetBool>(tree, "destroy").GetValue();
+                float shakeRotation = Helper.Reflection.GetField<float>(tree, "shakeRotation").GetValue();
+                float maxShake = Helper.Reflection.GetField<float>(tree, "maxShake").GetValue();
+                ModMonitor.Log($"Treedata: growthstage {tree.growthStage}, type: {tree.treeType}, health: {tree.health}, stump: {tree.stump}, falling: {falling}, shakeRotation: {shakeRotation}, maxShake: {maxShake}, shakeLeft {tree.shakeLeft}, destroy {destroy}");
+                DropItems(Game1.player.CurrentTool, true);
+            }
+            if(clump != null)
+            {
+                ModMonitor.Log($"ClumpData: parentSheetIndex: {clump.parentSheetIndex}, health: {clump.health}");
+                DropItems(Game1.player.CurrentTool, false);
+            }
+        }
+        //FIXME: Only stumpdrops get executed
+        public void DropItems(Tool t, bool isTree)
+        {
+            if (isTree)
+            {
+                float shakeRotation = Helper.Reflection.GetField<float>(tree, "shakeRotation").GetValue();
+                float maxShake = Helper.Reflection.GetField<float>(tree, "maxShake").GetValue();
+                bool falling = Helper.Reflection.GetField<NetBool>(tree, "falling").GetValue();
+
+                if (tree.growthStage >= 5)
+                {
+                    if (falling && tree.stump)
+                    {
+                        Game1.createMultipleObjectDebris(390, (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, 5);
+                        tree = null;
+                        ModMonitor.Log("Dropped Items for stump");
+                    }
+                    else if (falling && (double)Math.Abs(shakeRotation) > 1.5707963267948966)
+                    {
+                        Game1.createMultipleObjectDebris(390, (int)tree.currentTileLocation.X + (((bool)tree.shakeLeft) ? (-4) : 4), (int)tree.currentTileLocation.Y, 5);
+                        tree = null;
+                        ModMonitor.Log("Dropped Items for full tree");
+                    }
+                }
+            }
+            else
+            {
+                if(clump.health.Value < 0f)
+                {
+                    /*
+                    switch ((int)clump.parentSheetIndex)
+                    {
+                        case 600:
+                            Game1.createMultipleObjectDebris(390, (int)clump.tile.X, (int)clump.tile.Y, 5);
+                            ModMonitor.Log("Dropped Items for Large Stump");
+                            clump = null;
+                            break;
+                    }
+                    */
+                    for (int i = 0; i < Config.ResourceDrops[clump.parentSheetIndex].ItemID.Length; i++)
+                    {
+                        if (Config.ResourceDrops[clump.parentSheetIndex].Amount[i] != 0)
+                        {
+                            if (Game1.IsMultiplayer)
+                            {
+                                Game1.createMultipleObjectDebris(Config.ResourceDrops[clump.parentSheetIndex].ItemID[i], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[clump.parentSheetIndex].Amount[i], t.getLastFarmerToUse().UniqueMultiplayerID);
+                            }
+                            else
+                            {
+                                Game1.createMultipleObjectDebris(Config.ResourceDrops[clump.parentSheetIndex].ItemID[i], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[clump.parentSheetIndex].Amount[i]);
+                            }
+                        }
+                    }
+                    clump = null;
+                }
+            }
+            return;
+        }
+
+        public Vector2 GetTileInFrontOfPlayer(Farmer player)
+        {
+            Vector2 tileLocation = player.getTileLocation();
+            //facing directions: 0= top, 1= right, 2=down, 3= left
+            switch (player.facingDirection.Value)
+            {
+                case 0:
+                    tileLocation.Y -= 1;
+                    break;
+                case 1:
+                    tileLocation.X += 1;
+                    break;
+                case 2:
+                    tileLocation.Y += 1;
+                    break;
+                case 3:
+                    tileLocation.X -= 1;
+                    break;
+            }
+            return tileLocation;
+        }
+
+        public bool IsTreeInFrontOfPlayer(Farmer player)
+        {
+            Vector2 tileLocation = GetTileInFrontOfPlayer(player);
+            if (player.currentLocation.isTerrainFeatureAt((int)tileLocation.X, (int)tileLocation.Y) && player.currentLocation.terrainFeatures[tileLocation] is Tree)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsClumpInFrontOfPlayer(Farmer player)
+        {
+            Vector2 tileLocation = GetTileInFrontOfPlayer(player);
+            if (player.currentLocation.IsFarm)
+            {
+                foreach(ResourceClump resource in Game1.getFarm().resourceClumps)
+                {
+                    if(resource.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))
+                    {
+                        clump = resource;
+                        return true;
+                    }
+                }
+            }
+            if(player.currentLocation.NameOrUniqueName.Contains("Woods"))
+            {
+                Woods woods = player.currentLocation as Woods;
+                foreach (ResourceClump resource in woods.stumps)
+                {
+                    if(resource.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))
+                    {
+                        clump = resource;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public Tree GetTreeInFrontOfPlayer(Farmer player)
+        {
+            return (Tree)player.currentLocation.terrainFeatures[GetTileInFrontOfPlayer(player)];
+        }
+        /*
         /// <summary>"hook" of performToolAction in StardewValley.TerrainFeatures.ResourceClump</summary>
         /// <param name="__instance">reference to acces values in ResourceClump class</param>
         /// <param name="t">the tool used</param>
@@ -439,7 +599,7 @@ namespace MoreHardwood
                                 Game1.createItemDebris(@object, new Vector2(tileLocation.X, tileLocation.Y - 3f) * 64f, -1, location, Game1.player.getStandingY() - 32);
                             }
                         }
-                        */
+                        /
                     }
                     else if (explosion <= 0)
                     {
@@ -500,7 +660,7 @@ namespace MoreHardwood
                         float x = (float)boundingBox.Center.X;
                         boundingBox = t.getLastFarmerToUse().GetBoundingBox();
                         debris.Add(new Debris(12, numberOfChunks, debrisOrigin, new Vector2(x, (float)boundingBox.Center.Y), 0, -1));
-                        */
+                        /
                     }
                     else if (explosion <= 0)
                     {
@@ -517,7 +677,7 @@ namespace MoreHardwood
                     {
                         new Random((int)((float)(double)Game1.uniqueIDForThisGame + tileLocation.X * 7f + tileLocation.Y * 11f + (float)(double)Game1.stats.DaysPlayed + (float)health));
                     }
-                    */
+                    /
                     if (explosion <= 0)
                     {
                         switch ((int)t.upgradeLevel)
@@ -564,7 +724,7 @@ namespace MoreHardwood
                         location.playSound("axchop", NetAudio.SoundContext.Default);
                         Game1.createRadialDebris(location, 12, (int)tileLocation.X, (int)tileLocation.Y, Game1.random.Next(10, 20), false, -1, false, -1);
                     }
-                    */
+                    /
                     if (t is Axe || t is Pickaxe || t is Hoe || t is MeleeWeapon)
                     {
                         performSproutDestroy(t, tileLocation, location);
@@ -788,6 +948,6 @@ namespace MoreHardwood
                 }
             }
         }
-
+        */
     }
 }
