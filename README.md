@@ -1,6 +1,10 @@
 # MoreHardwood
 Stardew Valley Mod to increase item drops
 
+## Non-Harmony?
+Creating this mod with harmony was easy, so I want to try it without.
+Please don't build this. It's mostly untested, wonky at best and only intended as an exercise.
+
 ## What this does
 Originally intended to only increase the amount of Hardwood dropped by Large Logs and Large Stumps (hence the name), but can be used to alter all kinds of drops from resources and trees.
 Example: Cut a Large Stump, get 2 base Hardwood from the game and the items defined in the config (default: 2 Hardwood)
