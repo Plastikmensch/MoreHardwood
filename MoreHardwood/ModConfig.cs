@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using StardewModdingAPI;
 
+
 namespace MoreHardwood
 {
     class ConfigResorceDrops
     {
-        public int[] ItemID { get; set; }
-        public int[] Amount { get; set; }
+        public int[,] Drops { get; set; }
     }
     class ConfigTreeDrops
     {
@@ -20,57 +20,79 @@ namespace MoreHardwood
     internal class ModConfig
     {
         //public int hardwood { get; set; } = 2;
-        public Dictionary<int, ConfigResorceDrops> ResourceDrops { get; set; } = new Dictionary<int, ConfigResorceDrops> 
+        public Dictionary<string, ConfigResorceDrops> ResourceDrops { get; set; } = new Dictionary<string, ConfigResorceDrops> 
         {
             //Large Stump
-            [600] = new ConfigResorceDrops
+            ["LargeStump"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 709 }, Amount = new int[] { 2 }
+                Drops = new int[,]
+                {
+                    {709, 2}
+                }
             },
             //Large Log
-            [602] = new ConfigResorceDrops
+            ["LargeLog"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 709 }, Amount = new int[] { 8 }
+                Drops = new int[,]
+                {
+                    {709, 4}
+                }
             },
             //Meteorite
-            [622] = new ConfigResorceDrops
+            ["Meteorite"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 386, 390, 535}, Amount = new int[] {6, 6, 2}
+                Drops = new int[,]
+                {
+                    {386, 6},
+                    {390, 6},
+                    {535, 2}
+                }
             },
             //Boulder
-            [672] = new ConfigResorceDrops
+            ["Boulder"] = new ConfigResorceDrops
             {
-                ItemID = new int[] {390}, Amount = new int[] {15}
+                Drops = new int[,]
+                {
+                    {390, 15}
+                }
             },
             //MineRock1
-            [752] = new ConfigResorceDrops
+            ["MineRock1"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 390 },
-                Amount = new int[] { 10 }
+                Drops = new int[,]
+                {
+                    {390, 10}
+                }
             },
             //MineRock2
-            [754] = new ConfigResorceDrops
+            ["MineRock2"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 390 },
-                Amount = new int[] { 10 }
+                Drops = new int[,]
+                {
+                    {390, 10}
+                }
             },
             //MineRock3
-            [756] = new ConfigResorceDrops
+            ["MineRock3"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 390 },
-                Amount = new int[] { 10 }
+                Drops = new int[,]
+                {
+                    {390, 10}
+                }
             },
             //MineRock4
-            [758] = new ConfigResorceDrops
+            ["MineRock4"] = new ConfigResorceDrops
             {
-                ItemID = new int[] { 390 },
-                Amount = new int[] { 10 }
+                Drops = new int[,]
+                {
+                    {390, 10}
+                }
             }
         };
-        public Dictionary<int, ConfigTreeDrops> TreeDrops { get; set; } = new Dictionary<int, ConfigTreeDrops>
+        public Dictionary<string, ConfigTreeDrops> TreeDrops { get; set; } = new Dictionary<string, ConfigTreeDrops>
         {
             //bushyTree (Oak)
-            [1] = new ConfigTreeDrops
+            ["OakTree"] = new ConfigTreeDrops
             {
                 SeedDrops = new int[,]
                 {
@@ -95,7 +117,7 @@ namespace MoreHardwood
                 }
             },
             //leafyTree (Maple)
-            [2] = new ConfigTreeDrops
+            ["MapleTree"] = new ConfigTreeDrops
             {
                 SeedDrops = new int[,]
                 {
@@ -120,7 +142,7 @@ namespace MoreHardwood
                 }
             },
             //pineTree (Pine)
-            [3] = new ConfigTreeDrops
+            ["PineTree"] = new ConfigTreeDrops
             {
                 SeedDrops = new int[,]
                 {
@@ -145,7 +167,7 @@ namespace MoreHardwood
                 }
             },
             //winterTree1 / bushyTree (Oak in winter)
-            [4] = new ConfigTreeDrops
+            ["WinterOak"] = new ConfigTreeDrops
             {
                 SeedDrops = new int[,]
                 {
@@ -170,7 +192,7 @@ namespace MoreHardwood
                 }
             },
             //winterTree2 / leafyTree (Maple in winter)
-            [5] = new ConfigTreeDrops
+            ["WinterMaple"] = new ConfigTreeDrops
             {
                 SeedDrops = new int[,]
                 {
@@ -195,7 +217,7 @@ namespace MoreHardwood
                 }
             },
             //palmTree
-            [6] = new ConfigTreeDrops
+            ["PalmTree"] = new ConfigTreeDrops
             {
                 SproutDrops = new int[,]
                 {
@@ -216,7 +238,7 @@ namespace MoreHardwood
                 }
             },
             //mushroomTree
-            [7] = new ConfigTreeDrops
+            ["MushroomTree"] = new ConfigTreeDrops
             {
                 BushDrops = new int[,]
                 {

@@ -27,6 +27,7 @@ namespace MoreHardwood
         /// <summary>Reference to a tree</summary>
         private static Tree tree;
 
+        /// <summary>Reference to a ResourceClump</summary>
         private static ResourceClump clump;
 
         /// <summary>Array of valid items.</summary>
@@ -68,7 +69,11 @@ namespace MoreHardwood
             );
             */
         }
-
+        /// <summary>
+        /// Raised when a new day starts
+        /// </summary>
+        /// <param name="sender">The event sender</param>
+        /// <param name="e">the event arguments</param>
         public void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             //Show error message if mod is deactivated
@@ -117,37 +122,42 @@ namespace MoreHardwood
         public void CheckConfig()
         {
             //iterate through all the entries in ResourceDrops section of config
-            foreach (KeyValuePair<int, ConfigResorceDrops> index in Config.ResourceDrops)
+            foreach (KeyValuePair<string, ConfigResorceDrops> index in Config.ResourceDrops)
             {
-                for (int i = 0; i < Config.ResourceDrops[index.Key].Amount.Length; i++)
+                //Skip validation of Drops if it's null
+                if (Config.ResourceDrops[index.Key].Drops != null)
                 {
-                    if (Config.ResourceDrops[index.Key].Amount[i] < 0) Config.ResourceDrops[index.Key].Amount[i] = 0;
-                }
-                for (int i = 0; i < Config.ResourceDrops[index.Key].ItemID.Length; i++)
-                {
-                    if (!IsValidItem(Config.ResourceDrops[index.Key].ItemID[i]))
+                    for (int i = 0; i < Config.ResourceDrops[index.Key].Drops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.ResourceDrops[index.Key].ItemID[i]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
+                        if (!IsValidItem(Config.ResourceDrops[index.Key].Drops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.ResourceDrops[index.Key].Drops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.ResourceDrops[index.Key].Drops[i, 1] < 0) Config.ResourceDrops[index.Key].Drops[i, 1] = 0;
                     }
                 }
             }
             //iterate through all the entries in TreeDrops section of config
-            foreach (KeyValuePair<int, ConfigTreeDrops> index in Config.TreeDrops)
+            foreach (KeyValuePair<string, ConfigTreeDrops> index in Config.TreeDrops)
             {
-                for (int i = 0; i < Config.TreeDrops[index.Key].BushDrops.Length / 2; i++)
+                //Skip validation of Bushdrops if it's null
+                if(Config.TreeDrops[index.Key].BushDrops != null)
                 {
-                    if (!IsValidItem(Config.TreeDrops[index.Key].BushDrops[i, 0]))
+                    for (int i = 0; i < Config.TreeDrops[index.Key].BushDrops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].BushDrops[i, 0]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
-                    }
-                    if (Config.TreeDrops[index.Key].BushDrops[i, 0] < 0)
-                    {
-                        Config.TreeDrops[index.Key].BushDrops[i, 0] = 0;
+                        if (!IsValidItem(Config.TreeDrops[index.Key].BushDrops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].BushDrops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.TreeDrops[index.Key].BushDrops[i, 1] < 0)
+                        {
+                            Config.TreeDrops[index.Key].BushDrops[i, 1] = 0;
+                        }
                     }
                 }
-                //Skip validation if of SeedDrops if it's null
+                //Skip validation of SeedDrops if it's null
                 if (Config.TreeDrops[index.Key].SeedDrops != null)
                 {
                     for (int i = 0; i < Config.TreeDrops[index.Key].SeedDrops.Length / 2; i++)
@@ -157,9 +167,9 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].SeedDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].SeedDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].SeedDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].SeedDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].SeedDrops[i, 1] = 0;
                         }
                     }
                 }
@@ -173,22 +183,26 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].SproutDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].SproutDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].SproutDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].SproutDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].SproutDrops[i, 1] = 0;
                         }
                     }
                 }
-                for (int i = 0; i < Config.TreeDrops[index.Key].TreeDrops.Length / 2; i++)
+                //Skip validation of TreeDrops if it's null
+                if (Config.TreeDrops[index.Key].TreeDrops != null)
                 {
-                    if (!IsValidItem(Config.TreeDrops[index.Key].TreeDrops[i, 0]))
+                    for (int i = 0; i < Config.TreeDrops[index.Key].TreeDrops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].TreeDrops[i, 0]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
-                    }
-                    if (Config.TreeDrops[index.Key].TreeDrops[i, 0] < 0)
-                    {
-                        Config.TreeDrops[index.Key].TreeDrops[i, 0] = 0;
+                        if (!IsValidItem(Config.TreeDrops[index.Key].TreeDrops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].TreeDrops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.TreeDrops[index.Key].TreeDrops[i, 1] < 0)
+                        {
+                            Config.TreeDrops[index.Key].TreeDrops[i, 1] = 0;
+                        }
                     }
                 }
                 //Skip validation of StumpDrops if it's null
@@ -201,9 +215,9 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].StumpDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].StumpDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].StumpDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].StumpDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].StumpDrops[i, 1] = 0;
                         }
                     }
                 }
@@ -237,6 +251,7 @@ namespace MoreHardwood
         {
 
             if (!Context.IsPlayerFree) return;
+            if (!IsModActive) return;
             SButton key = e.Button;
             if (key.IsUseToolButton() || (key.IsUseToolButton() && e.IsDown(key)))
             {
@@ -245,10 +260,10 @@ namespace MoreHardwood
                 ModMonitor.Log($"player facing: {Game1.player.facingDirection}");
                 ModMonitor.Log($"player location: {Game1.player.getTileLocation()} tool location: {GetTileInFrontOfPlayer(Game1.player)}");
 
-                if(IsTreeInFrontOfPlayer(Game1.player) && t is Axe)
+                if(IsTreeInFrontOfPlayer(Game1.player))
                 {
                     ModMonitor.Log("Found Tree");
-                    //growthstages: 6 = full grown (stage 5 wiki), 4 = small tree (stage 4 wiki)
+                    //growthstages: 6 = full grown (stage 5 wiki), 4 = small tree (stage 4 wiki), 1 = stage 2 wiki, 0 = seed
                     tree = GetTreeInFrontOfPlayer(Game1.player);
                     //ModMonitor.Log($"Treedata: growstage {tree.growthStage}, type: {tree.treeType}, health: {tree.health}");
                 }
@@ -281,7 +296,8 @@ namespace MoreHardwood
                 bool destroy = Helper.Reflection.GetField<NetBool>(tree, "destroy").GetValue();
                 float shakeRotation = Helper.Reflection.GetField<float>(tree, "shakeRotation").GetValue();
                 float maxShake = Helper.Reflection.GetField<float>(tree, "maxShake").GetValue();
-                ModMonitor.Log($"Treedata: growthstage {tree.growthStage}, type: {tree.treeType}, health: {tree.health}, stump: {tree.stump}, falling: {falling}, shakeRotation: {shakeRotation}, maxShake: {maxShake}, shakeLeft {tree.shakeLeft}, destroy {destroy}");
+                float shakeTimer = Helper.Reflection.GetField<float>(tree, "shakeTimer").GetValue();
+                ModMonitor.Log($"Treedata: growthstage {tree.growthStage}, type: {tree.treeType}, health: {tree.health}, stump: {tree.stump}, falling: {falling}, flipped: {tree.flipped}, shakeRotation: {shakeRotation}, maxShake: {maxShake}, shakeTimer: {shakeTimer}, shakeLeft {tree.shakeLeft}, destroy {destroy}");
                 DropItems(Game1.player.CurrentTool, true);
             }
             if(clump != null)
@@ -290,60 +306,145 @@ namespace MoreHardwood
                 DropItems(Game1.player.CurrentTool, false);
             }
         }
-        //FIXME: Only stumpdrops get executed
+
         public void DropItems(Tool t, bool isTree)
         {
+            //FIXME: Timing issues. Drops appear before they should 416
             if (isTree)
             {
                 float shakeRotation = Helper.Reflection.GetField<float>(tree, "shakeRotation").GetValue();
                 float maxShake = Helper.Reflection.GetField<float>(tree, "maxShake").GetValue();
                 bool falling = Helper.Reflection.GetField<NetBool>(tree, "falling").GetValue();
 
+                string key = GetKeyForObject(tree.treeType);
+
                 if (tree.growthStage >= 5)
                 {
-                    if (falling && tree.stump)
+                    //FIXME: shakeRotation is inconsistent and results in Drops not appearing
+                    if (falling && (double)Math.Abs(shakeRotation) > 1.54)
                     {
-                        Game1.createMultipleObjectDebris(390, (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, 5);
+                        if (Config.TreeDrops[key].TreeDrops != null)
+                        {
+                            for (int i = 0; i < Config.TreeDrops[key].TreeDrops.Length / 2; i++)
+                            {
+                                if (Game1.IsMultiplayer)
+                                {
+                                    NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].TreeDrops[i, 0], (int)tree.currentTileLocation.X + (((bool)tree.shakeLeft) ? (-4) : 4), (int)tree.currentTileLocation.Y, Config.TreeDrops[key].TreeDrops[i, 1], lastPlayerToHit, tree.currentLocation);
+                                }
+                                else
+                                {
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].TreeDrops[i, 0], (int)tree.currentTileLocation.X + (((bool)tree.shakeLeft) ? (-4) : 4), (int)tree.currentTileLocation.Y, Config.TreeDrops[key].TreeDrops[i, 1], tree.currentLocation);
+                                }
+                            }
+                        }
+                        tree = null;
+                        ModMonitor.Log("Dropped Items for full tree");
+                    }
+                    else if (tree.health == -100f)
+                    {
+                        if (Config.TreeDrops[key].StumpDrops != null)
+                        {
+                            for (int i = 0; i < Config.TreeDrops[key].StumpDrops.Length / 2; i++)
+                            {
+                                if (Game1.IsMultiplayer)
+                                {
+                                    NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].StumpDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].StumpDrops[i, 1], lastPlayerToHit, tree.currentLocation);
+                                }
+                                else
+                                {
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].StumpDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].StumpDrops[i, 1], tree.currentLocation);
+                                }
+                            }
+                        }
                         tree = null;
                         ModMonitor.Log("Dropped Items for stump");
                     }
-                    else if (falling && (double)Math.Abs(shakeRotation) > 1.5707963267948966)
+                }
+                else if (tree.growthStage >= 3)
+                {
+                    if (Config.TreeDrops[key].BushDrops != null)
                     {
-                        Game1.createMultipleObjectDebris(390, (int)tree.currentTileLocation.X + (((bool)tree.shakeLeft) ? (-4) : 4), (int)tree.currentTileLocation.Y, 5);
+                        for (int i = 0; i < Config.TreeDrops[key].BushDrops.Length / 2; i++)
+                        {
+                            if (Game1.IsMultiplayer)
+                            {
+                                NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].BushDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].BushDrops[i, 1], lastPlayerToHit, tree.currentLocation);
+                            }
+                            else
+                            {
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].BushDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].BushDrops[i, 1], tree.currentLocation);
+                            }
+                        }
                         tree = null;
-                        ModMonitor.Log("Dropped Items for full tree");
+                        ModMonitor.Log("Dropped Items for bush");
+                    }
+                }
+                else if (tree.growthStage >=1)
+                {
+                    if (Config.TreeDrops[key].SproutDrops != null)
+                    {
+                        for (int i = 0; i < Config.TreeDrops[key].SproutDrops.Length / 2; i++)
+                        {
+                            if (Game1.IsMultiplayer)
+                            {
+                                NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].SproutDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].SproutDrops[i, 1], lastPlayerToHit, tree.currentLocation);
+                            }
+                            else
+                            {
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].SproutDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].SproutDrops[i, 1], tree.currentLocation);
+                            }
+                        }
+                        tree = null;
+                        ModMonitor.Log("Dropped Items for sprout");
+                    }
+                }
+                else
+                {
+                    if (Config.TreeDrops[key].SeedDrops != null)
+                    {
+                        for (int i = 0; i < Config.TreeDrops[key].SeedDrops.Length / 2; i++)
+                        {
+                            if (Game1.IsMultiplayer)
+                            {
+                                NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].SeedDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].SeedDrops[i, 1], lastPlayerToHit, tree.currentLocation);
+                            }
+                            else
+                            {
+                                Game1.createMultipleObjectDebris(Config.TreeDrops[key].SeedDrops[i, 0], (int)tree.currentTileLocation.X, (int)tree.currentTileLocation.Y, Config.TreeDrops[key].SeedDrops[i, 1], tree.currentLocation);
+                            }
+                        }
+                        tree = null;
+                        ModMonitor.Log("Dropped Items for seed");
                     }
                 }
             }
             else
             {
+                string key = GetKeyForObject(clump.parentSheetIndex);
+
                 if(clump.health.Value < 0f)
                 {
-                    /*
-                    switch ((int)clump.parentSheetIndex)
+                    for (int i = 0; i < Config.ResourceDrops[key].Drops.Length / 2; i++)
                     {
-                        case 600:
-                            Game1.createMultipleObjectDebris(390, (int)clump.tile.X, (int)clump.tile.Y, 5);
-                            ModMonitor.Log("Dropped Items for Large Stump");
-                            clump = null;
-                            break;
-                    }
-                    */
-                    for (int i = 0; i < Config.ResourceDrops[clump.parentSheetIndex].ItemID.Length; i++)
-                    {
-                        if (Config.ResourceDrops[clump.parentSheetIndex].Amount[i] != 0)
+                        if (Config.ResourceDrops[key].Drops[i, 1] != 0)
                         {
                             if (Game1.IsMultiplayer)
                             {
-                                Game1.createMultipleObjectDebris(Config.ResourceDrops[clump.parentSheetIndex].ItemID[i], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[clump.parentSheetIndex].Amount[i], t.getLastFarmerToUse().UniqueMultiplayerID);
+                                Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[key].Drops[i, 1], t.getLastFarmerToUse().UniqueMultiplayerID);
                             }
                             else
                             {
-                                Game1.createMultipleObjectDebris(Config.ResourceDrops[clump.parentSheetIndex].ItemID[i], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[clump.parentSheetIndex].Amount[i]);
+                                Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)clump.tile.X, (int)clump.tile.Y, Config.ResourceDrops[key].Drops[i, 1]);
                             }
                         }
                     }
                     clump = null;
+                    ModMonitor.Log($"Dropped items for {key}");
                 }
             }
             return;
@@ -374,7 +475,7 @@ namespace MoreHardwood
         public bool IsTreeInFrontOfPlayer(Farmer player)
         {
             Vector2 tileLocation = GetTileInFrontOfPlayer(player);
-            if (player.currentLocation.isTerrainFeatureAt((int)tileLocation.X, (int)tileLocation.Y) && player.currentLocation.terrainFeatures[tileLocation] is Tree)
+            if (player.currentLocation.terrainFeatures.ContainsKey(tileLocation) && player.currentLocation.terrainFeatures[tileLocation] is Tree)
             {
                 return true;
             }
@@ -400,7 +501,19 @@ namespace MoreHardwood
                 Woods woods = player.currentLocation as Woods;
                 foreach (ResourceClump resource in woods.stumps)
                 {
-                    if(resource.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))
+                    if (resource.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))
+                    {
+                        clump = resource;
+                        return true;
+                    }
+                }
+            }
+            if(player.currentLocation is MineShaft)
+            {
+                MineShaft mineShaft = player.currentLocation as MineShaft;
+                foreach(ResourceClump resource in mineShaft.resourceClumps)
+                {
+                    if (resource.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))
                     {
                         clump = resource;
                         return true;
@@ -413,6 +526,44 @@ namespace MoreHardwood
         public Tree GetTreeInFrontOfPlayer(Farmer player)
         {
             return (Tree)player.currentLocation.terrainFeatures[GetTileInFrontOfPlayer(player)];
+        }
+
+        public string GetKeyForObject(int index)
+        {
+            switch(index)
+            {
+                case 1:
+                    return "OakTree";
+                case 2: 
+                    return "MapleTree";
+                case 3: 
+                    return "PineTree";
+                case 4: 
+                    return "WinterOak";
+                case 5: 
+                    return "WinterMaple";
+                case 6: 
+                    return "PalmTree";
+                case 7: 
+                    return "MushroomTree";
+                case 600:
+                    return "LargeStump";
+                case 602:
+                    return "LargeLog";
+                case 622:
+                    return "Meteorite";
+                case 672:
+                    return "Boulder";
+                case 752:
+                    return "MineRock1";
+                case 754:
+                    return "MineRock2";
+                case 756:
+                    return "MineRock3";
+                case 758:
+                    return "MineRockt4";
+            }
+            return "";
         }
         /*
         /// <summary>"hook" of performToolAction in StardewValley.TerrainFeatures.ResourceClump</summary>
