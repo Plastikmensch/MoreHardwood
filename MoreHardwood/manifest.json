@@ -1,8 +1,8 @@
 ﻿{
   "Name": "MoreHardwood",
   "Author": "Plastikmensch",
-  "Version": "1.0.0",
-  "Description": "Logs drop more hardwood",
+  "Version": "1.1.0",
+  "Description": "Configurable drops",
   "UniqueID": "Plastikmensch.MoreHardwood",
   "EntryDll": "MoreHardwood.dll",
   "MinimumApiVersion": "2.10.0",
