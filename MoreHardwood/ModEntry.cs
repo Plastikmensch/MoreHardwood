@@ -111,23 +111,24 @@ namespace MoreHardwood
         public void CheckConfig()
         {
             //iterate through all the entries in ResourceDrops section of config
-            foreach (KeyValuePair<int, ConfigResorceDrops> index in Config.ResourceDrops)
+            foreach (KeyValuePair<string, ConfigResorceDrops> index in Config.ResourceDrops)
             {
-                for (int i = 0; i < Config.ResourceDrops[index.Key].Amount.Length; i++)
+                //Skip validation of Drops if it's null
+                if (Config.ResourceDrops[index.Key].Drops != null)
                 {
-                    if (Config.ResourceDrops[index.Key].Amount[i] < 0) Config.ResourceDrops[index.Key].Amount[i] = 0;
-                }
-                for (int i = 0; i < Config.ResourceDrops[index.Key].ItemID.Length; i++)
-                {
-                    if (!IsValidItem(Config.ResourceDrops[index.Key].ItemID[i]))
+                    for (int i = 0; i < Config.ResourceDrops[index.Key].Drops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.ResourceDrops[index.Key].ItemID[i]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
+                        if (!IsValidItem(Config.ResourceDrops[index.Key].Drops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.ResourceDrops[index.Key].Drops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.ResourceDrops[index.Key].Drops[i, 1] < 0) Config.ResourceDrops[index.Key].Drops[i, 1] = 0;
                     }
                 }
             }
             //iterate through all the entries in TreeDrops section of config
-            foreach (KeyValuePair<int, ConfigTreeDrops> index in Config.TreeDrops)
+            foreach (KeyValuePair<string, ConfigTreeDrops> index in Config.TreeDrops)
             {
                 //Skip validation of BushDrops if it's null
                 if (Config.TreeDrops[index.Key].BushDrops != null) {
@@ -226,6 +227,48 @@ namespace MoreHardwood
             }
             return false;
         }
+        /// <summary>
+        /// Gets the key for for an object.
+        /// </summary>
+        /// <returns>The key for an object.</returns>
+        /// <param name="index">parentSheetIndex of ResourceClump or treeType</param>
+        public static string GetKeyForObject(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return "OakTree";
+                case 2:
+                    return "MapleTree";
+                case 3:
+                    return "PineTree";
+                case 4:
+                    return "WinterOak";
+                case 5:
+                    return "WinterMaple";
+                case 6:
+                    return "PalmTree";
+                case 7:
+                    return "MushroomTree";
+                case 600:
+                    return "LargeStump";
+                case 602:
+                    return "LargeLog";
+                case 622:
+                    return "Meteorite";
+                case 672:
+                    return "Boulder";
+                case 752:
+                    return "MineRock1";
+                case 754:
+                    return "MineRock2";
+                case 756:
+                    return "MineRock3";
+                case 758:
+                    return "MineRockt4";
+            }
+            return "";
+        }
 
         /// <summary>
         /// Gets called when a button is pressed 
@@ -283,9 +326,14 @@ namespace MoreHardwood
                 NetInt width = __instance.width;
                 NetFloat health = __instance.health;
                 NetInt parentSheetIndex = __instance.parentSheetIndex;
+                string key = GetKeyForObject(parentSheetIndex);
 
+                //Skip if Drops is null
+                if (Config.ResourceDrops[key].Drops == null)
+                {
+                    return true;
+                }
                 //Taken from the game code
-
                 float num = Math.Max(1f, (float)((int)t.upgradeLevel + 1) * 0.75f);
                 health.Value -= num;
                 //Game1.createRadialDebris(Game1.currentLocation, debrisType, (int)tileLocation.X + Game1.random.Next((int)width / 2 + 1), (int)tileLocation.Y + Game1.random.Next((int)height / 2 + 1), Game1.random.Next(4, 9), false, -1, false, -1);
@@ -299,17 +347,17 @@ namespace MoreHardwood
                         case 600:
                         case 602:
                             {
-                                for (int i = 0; i < Config.ResourceDrops[parentSheetIndex].ItemID.Length; i++)
+                                for (int i = 0; i < Config.ResourceDrops[key].Drops.Length / 2; i++)
                                 {
-                                    if (Config.ResourceDrops[parentSheetIndex].Amount[i] != 0)
+                                    if (Config.ResourceDrops[key].Drops[i, 1] != 0)
                                     {
                                         if (Game1.IsMultiplayer)
                                         {
-                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i], t.getLastFarmerToUse().UniqueMultiplayerID);
+                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1], t.getLastFarmerToUse().UniqueMultiplayerID);
                                         }
                                         else
                                         {
-                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i]);
+                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1]);
                                         }
                                     }
                                 }
@@ -322,15 +370,15 @@ namespace MoreHardwood
                         case 756:
                         case 758:
                             {
-                                for (int i = 0; i < Config.ResourceDrops[parentSheetIndex].ItemID.Length; i++)
+                                for (int i = 0; i < Config.ResourceDrops[key].Drops.Length / 2; i++)
                                 {
                                     if (Game1.IsMultiplayer)
                                     {
-                                        Game1.createMultipleObjectDebris(Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i], t.getLastFarmerToUse().UniqueMultiplayerID);
+                                        Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1], t.getLastFarmerToUse().UniqueMultiplayerID);
                                     }
                                     else
                                     {
-                                        Game1.createRadialDebris(Game1.currentLocation, Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i], false, -1, true, -1);
+                                        Game1.createRadialDebris(Game1.currentLocation, Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1], false, -1, true, -1);
                                     }
                                 }
                                 return true;
@@ -338,17 +386,17 @@ namespace MoreHardwood
                         //Meteorite
                         case 622:
                             {
-                                for (int i = 0; i < Config.ResourceDrops[parentSheetIndex].ItemID.Length; i++)
+                                for (int i = 0; i < Config.ResourceDrops[key].Drops.Length / 2; i++)
                                 {
-                                    if (Config.ResourceDrops[parentSheetIndex].Amount[i] != 0)
+                                    if (Config.ResourceDrops[key].Drops[i, 1] != 0)
                                     {
                                         if (Game1.IsMultiplayer)
                                         {
-                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i], t.getLastFarmerToUse().UniqueMultiplayerID);
+                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1], t.getLastFarmerToUse().UniqueMultiplayerID);
                                         }
                                         else
                                         {
-                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[parentSheetIndex].ItemID[i], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[parentSheetIndex].Amount[i]);
+                                            Game1.createMultipleObjectDebris(Config.ResourceDrops[key].Drops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.ResourceDrops[key].Drops[i, 1]);
                                         }
                                     }
                                 }
@@ -643,17 +691,19 @@ namespace MoreHardwood
                         NetInt treeType = tree.treeType;
                         NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
 
-                        if (Config.TreeDrops[treeType].TreeDrops != null)
+                        string key = GetKeyForObject(treeType);
+
+                        if (Config.TreeDrops[key].TreeDrops != null)
                         {
-                            for (int i = 0; i < Config.TreeDrops[treeType].TreeDrops.Length / 2; i++)
+                            for (int i = 0; i < Config.TreeDrops[key].TreeDrops.Length / 2; i++)
                             {
                                 if(Game1.IsMultiplayer)
                                 {
-                                    Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].TreeDrops[i, 0], (int)tileLocation.X + (((bool)shakeLeft) ? (-4) : 4), (int)tileLocation.Y, Config.TreeDrops[treeType].TreeDrops[i, 1], lastPlayerToHit, location);
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].TreeDrops[i, 0], (int)tileLocation.X + (((bool)shakeLeft) ? (-4) : 4), (int)tileLocation.Y, Config.TreeDrops[key].TreeDrops[i, 1], lastPlayerToHit, location);
                                 }
                                 else
                                 {
-                                    Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].TreeDrops[i, 0], (int)tileLocation.X + (((bool)shakeLeft) ? (-4) : 4), (int)tileLocation.Y, Config.TreeDrops[treeType].TreeDrops[i, 1], location);
+                                    Game1.createMultipleObjectDebris(Config.TreeDrops[key].TreeDrops[i, 0], (int)tileLocation.X + (((bool)shakeLeft) ? (-4) : 4), (int)tileLocation.Y, Config.TreeDrops[key].TreeDrops[i, 1], location);
                                 }
                             }
                         }
@@ -692,20 +742,22 @@ namespace MoreHardwood
             NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
             NetBool falling = ModHelper.Reflection.GetField<NetBool>(tree, "falling").GetValue();
 
+            string key = GetKeyForObject(treeType);
+
             //Code for calculation of tree fall position: (int)tileLocation.X + (((bool)shakeLeft) ? (-4) : 4)
             if ((bool)stump)
             {
-                if (Config.TreeDrops[treeType].StumpDrops != null)
+                if (Config.TreeDrops[key].StumpDrops != null)
                 {
-                    for (int i = 0; i < Config.TreeDrops[treeType].StumpDrops.Length / 2; i++)
+                    for (int i = 0; i < Config.TreeDrops[key].StumpDrops.Length / 2; i++)
                     {
                         if (Game1.IsMultiplayer)
                         {
-                            Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].StumpDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].StumpDrops[i, 1], lastPlayerToHit, location);
+                            Game1.createMultipleObjectDebris(Config.TreeDrops[key].StumpDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].StumpDrops[i, 1], lastPlayerToHit, location);
                         }
                         else
                         {
-                            Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].StumpDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].StumpDrops[i, 1], location);
+                            Game1.createMultipleObjectDebris(Config.TreeDrops[key].StumpDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].StumpDrops[i, 1], location);
                         }
                     }
                 }
@@ -724,17 +776,19 @@ namespace MoreHardwood
             NetInt treeType = tree.treeType;
             NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
 
-            if (Config.TreeDrops[treeType].BushDrops != null)
+            string key = GetKeyForObject(treeType);
+
+            if (Config.TreeDrops[key].BushDrops != null)
             {
-                for (int i = 0; i < Config.TreeDrops[treeType].BushDrops.Length/2; i++)
+                for (int i = 0; i < Config.TreeDrops[key].BushDrops.Length/2; i++)
                 {
                     if (Game1.IsMultiplayer)
                     {
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].BushDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].BushDrops[i, 1], lastPlayerToHit, location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].BushDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].BushDrops[i, 1], lastPlayerToHit, location);
                     }
                     else
                     {
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].BushDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].BushDrops[i, 1], location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].BushDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].BushDrops[i, 1], location);
                     }
                 }
             }
@@ -752,17 +806,19 @@ namespace MoreHardwood
             NetInt treeType = tree.treeType;
             NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
 
-            if (Config.TreeDrops[treeType].SeedDrops != null)
+            string key = GetKeyForObject(treeType);
+
+            if (Config.TreeDrops[key].SeedDrops != null)
             {
-                for (int i = 0; i < Config.TreeDrops[treeType].SeedDrops.Length/2; i++)
+                for (int i = 0; i < Config.TreeDrops[key].SeedDrops.Length/2; i++)
                 {
                     if (Game1.IsMultiplayer)
                     {
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].SeedDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].SeedDrops[i, 1], lastPlayerToHit, location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].SeedDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].SeedDrops[i, 1], lastPlayerToHit, location);
                     }
                     else
                     {
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].SeedDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].SeedDrops[i, 1], location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].SeedDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].SeedDrops[i, 1], location);
                     }
                 }
             }
@@ -778,18 +834,21 @@ namespace MoreHardwood
             ModMonitor.Log($"performSproutDestroy called with: t: {t} tileLocation: {tileLocation} location: {location}");
 
             NetInt treeType = tree.treeType;
-            if (Config.TreeDrops[treeType].SproutDrops != null)
+
+            string key = GetKeyForObject(treeType);
+
+            if (Config.TreeDrops[key].SproutDrops != null)
             {
-                for (int i = 0; i < Config.TreeDrops[treeType].SproutDrops.Length/2; i++)
+                for (int i = 0; i < Config.TreeDrops[key].SproutDrops.Length/2; i++)
                 {
                     if (Game1.IsMultiplayer)
                     {
                         NetLong lastPlayerToHit = ModHelper.Reflection.GetField<NetLong>(tree, "lastPlayerToHit").GetValue();
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].SproutDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].SproutDrops[i, 1], lastPlayerToHit, location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].SproutDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].SproutDrops[i, 1], lastPlayerToHit, location);
                     }
                     else
                     {
-                        Game1.createMultipleObjectDebris(Config.TreeDrops[treeType].SproutDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[treeType].SproutDrops[i, 1], location);
+                        Game1.createMultipleObjectDebris(Config.TreeDrops[key].SproutDrops[i, 0], (int)tileLocation.X, (int)tileLocation.Y, Config.TreeDrops[key].SproutDrops[i, 1], location);
                     }
                 }
             }
