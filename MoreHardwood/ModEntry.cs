@@ -129,16 +129,19 @@ namespace MoreHardwood
             //iterate through all the entries in TreeDrops section of config
             foreach (KeyValuePair<int, ConfigTreeDrops> index in Config.TreeDrops)
             {
-                for (int i = 0; i < Config.TreeDrops[index.Key].BushDrops.Length / 2; i++)
-                {
-                    if (!IsValidItem(Config.TreeDrops[index.Key].BushDrops[i, 0]))
+                //Skip validation of BushDrops if it's null
+                if (Config.TreeDrops[index.Key].BushDrops != null) {
+                    for (int i = 0; i < Config.TreeDrops[index.Key].BushDrops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].BushDrops[i, 0]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
-                    }
-                    if (Config.TreeDrops[index.Key].BushDrops[i, 0] < 0)
-                    {
-                        Config.TreeDrops[index.Key].BushDrops[i, 0] = 0;
+                        if (!IsValidItem(Config.TreeDrops[index.Key].BushDrops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].BushDrops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.TreeDrops[index.Key].BushDrops[i, 1] < 0)
+                        {
+                            Config.TreeDrops[index.Key].BushDrops[i, 1] = 0;
+                        }
                     }
                 }
                 //Skip validation if of SeedDrops if it's null
@@ -151,9 +154,9 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].SeedDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].SeedDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].SeedDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].SeedDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].SeedDrops[i, 1] = 0;
                         }
                     }
                 }
@@ -167,22 +170,25 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].SproutDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].SproutDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].SproutDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].SproutDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].SproutDrops[i, 1] = 0;
                         }
                     }
                 }
-                for (int i = 0; i < Config.TreeDrops[index.Key].TreeDrops.Length / 2; i++)
-                {
-                    if (!IsValidItem(Config.TreeDrops[index.Key].TreeDrops[i, 0]))
+                //Skip validation of TreeDrops if it's null
+                if (Config.TreeDrops[index.Key].TreeDrops != null) {
+                    for (int i = 0; i < Config.TreeDrops[index.Key].TreeDrops.Length / 2; i++)
                     {
-                        ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].TreeDrops[i, 0]} is not a valid item!", LogLevel.Error);
-                        IsModActive = false;
-                    }
-                    if (Config.TreeDrops[index.Key].TreeDrops[i, 0] < 0)
-                    {
-                        Config.TreeDrops[index.Key].TreeDrops[i, 0] = 0;
+                        if (!IsValidItem(Config.TreeDrops[index.Key].TreeDrops[i, 0]))
+                        {
+                            ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].TreeDrops[i, 0]} is not a valid item!", LogLevel.Error);
+                            IsModActive = false;
+                        }
+                        if (Config.TreeDrops[index.Key].TreeDrops[i, 1] < 0)
+                        {
+                            Config.TreeDrops[index.Key].TreeDrops[i, 1] = 0;
+                        }
                     }
                 }
                 //Skip validation of StumpDrops if it's null
@@ -195,9 +201,9 @@ namespace MoreHardwood
                             ModMonitor.Log($"Error in config: {Config.TreeDrops[index.Key].StumpDrops[i, 0]} is not a valid item!", LogLevel.Error);
                             IsModActive = false;
                         }
-                        if (Config.TreeDrops[index.Key].StumpDrops[i, 0] < 0)
+                        if (Config.TreeDrops[index.Key].StumpDrops[i, 1] < 0)
                         {
-                            Config.TreeDrops[index.Key].StumpDrops[i, 0] = 0;
+                            Config.TreeDrops[index.Key].StumpDrops[i, 1] = 0;
                         }
                     }
                 }
