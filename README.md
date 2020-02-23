@@ -6,29 +6,23 @@ Originally intended to only increase the amount of Hardwood dropped by Large Log
 Example: Cut a Large Stump, get 2 base Hardwood from the game and the items defined in the config (default: 2 Hardwood)
 
 ## Configuration
-(It's complicated, I know...)<br>
 Config consists of basically 2 parts: ResourceDrops and TreeDrops
 ### ResourceDrops
-ResourceDrops has as key the parentSheetIndex of Objects. Meaning: "600"=Large Stump, "602"= Large Log etc.
-Every key has 2 Arrays as value: ItemID and Amount.
-ItemID are the IDs of items which should drop and Amount are the amount of how many should drop.
-Example: ```"600": {
-      "ItemID": [
-        709
-      ],
-      "Amount": [
-        2
+ResourceDrops has as key the name of an ResourceClump. Every key has as value an array (Drops), which defines which and how much additional items should drop from a Resourceclump. Example: ```"LargeStump": {
+      "Drops": [
+        [
+          709,
+          2
+        ]
       ]
-    },``` Means Large Stumps ("600") drop 2 (Amount: 2) Hardwood(ItemID: 709)
+    }``` This example means that Large Stumps drop 2 additional Hardwood (ID: 709)
+    Drops can also be null (```"Drops": null), so no additional items will drop.
 ### TreeDrops
-TreeDrops has as key the type of tree (1 = Oak Tree, 2 = Maple Tree etc.).
-Every key has other keys for the stage of the tree. Meaning: SeedDrops = What tree seed drop, TreeDrops = What a full grown tree drops, etc.
-The value for every tree stage are arrays in the [ItemID, Amount] format.
-Example:```"TreeDrops": {
-    "1": {
+Treedrops has as key the type of tree as string. Each key itself has a key for the growth stage of the tree.
+Example: ```"OakTree": {
       "SeedDrops": [
         [
           309,
           1
         ]
-      ],``` Oak Trees ("1") drop, when only a seed, one acorn (309, 1)
+      ],``` Means that an oak tree, which is just a seed, drops 1 additional Acorn (ID: 309)
