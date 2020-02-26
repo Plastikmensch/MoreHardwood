@@ -561,7 +561,7 @@ namespace MoreHardwood
                 case 756:
                     return "MineRock3";
                 case 758:
-                    return "MineRockt4";
+                    return "MineRock4";
             }
             return "";
         }
