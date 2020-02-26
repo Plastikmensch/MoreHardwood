@@ -265,7 +265,7 @@ namespace MoreHardwood
                 case 756:
                     return "MineRock3";
                 case 758:
-                    return "MineRockt4";
+                    return "MineRock4";
             }
             return "";
         }
@@ -327,7 +327,7 @@ namespace MoreHardwood
                 NetFloat health = __instance.health;
                 NetInt parentSheetIndex = __instance.parentSheetIndex;
                 string key = GetKeyForObject(parentSheetIndex);
-
+                ModMonitor.Log($"performToolAction: key: {key}, index: {parentSheetIndex}");
                 //Skip if Drops is null
                 if (Config.ResourceDrops[key].Drops == null)
                 {
