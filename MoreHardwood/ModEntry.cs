@@ -27,7 +27,7 @@ namespace MoreHardwood
         private static Tree tree;
 
         /// <summary>Array of valid items.</summary>
-        private static int[] validItems = new int[700];
+        private static int[] validItems = new int[750];
 
         /// <summary>Wether mod is active or not.</summary>
         private static bool IsModActive = true;
