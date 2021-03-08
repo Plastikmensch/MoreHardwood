@@ -17,7 +17,8 @@ namespace MoreHardwood
         public int[,] TreeDrops { get; set; }
         public int[,] StumpDrops { get; set; }
     }
-    internal class ModConfig
+    // changes here don't update config file. config.json needs to be deleted for updates.
+    class ModConfig
     {
         //public int hardwood { get; set; } = 2;
         public Dictionary<string, ConfigResorceDrops> ResourceDrops { get; set; } = new Dictionary<string, ConfigResorceDrops>
@@ -254,6 +255,23 @@ namespace MoreHardwood
                 {
                     {420, 1},
                     {422, 1}
+                }
+            },
+            //mahoganyTree
+            ["MahoganyTree"] = new ConfigTreeDrops
+            {
+                SeedDrops = new int[,]
+                {
+                    {292,1}
+                },
+                TreeDrops = new int[,]
+                {
+                    {709,10}
+
+                },
+                StumpDrops = new int[,]
+                {
+                    {709,1}
                 }
             }
         };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Harmony;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -103,6 +104,30 @@ namespace MoreHardwood
             }
             ModMonitor.Log($"Amount of valid items: {i}");
             CheckConfig();
+
+            /*
+            // add support for Generic Config Menu
+            var menu = Helper.ModRegistry.GetApi<GenericModConfigMenuAPI>("spacechase0.GenericModConfigMenu");
+            menu.RegisterModConfig(ModManifest, () => Config = new ModConfig(), () => Helper.WriteConfig(Config));
+            menu.RegisterLabel(ModManifest, "Resource Drops", "");
+            //menu.RegisterSimpleOption(ModManifest, "Large Stump Drop", "Item that drops", () => Config.ResourceDrops["LargeStump"].Drops[0, 0], (int val) => Config.ResourceDrops["LargeStump"].Drops[0, 0] = val);
+            //menu.RegisterSimpleOption(ModManifest, "Large Stump Amount", "Amount that drops", () => Config.ResourceDrops["LargeStump"].Drops[0, 1], (int val) => Config.ResourceDrops["LargeStump"].Drops[0, 1] = val);
+            foreach (KeyValuePair<string, ConfigResorceDrops> index in Config.ResourceDrops)
+            {
+                if (Config.ResourceDrops[index.Key].Drops != null)
+                {
+                    for (int j = 0; j < Config.ResourceDrops[index.Key].Drops.Length / 2; j++)
+                    {
+                        ModMonitor.Log($"{j}");
+                        ModMonitor.Log(index.Key);
+                        ModMonitor.Log($"{Config.ResourceDrops[index.Key].Drops[j, 0]}");
+                        ModMonitor.Log($"{Config.ResourceDrops[index.Key].Drops[j, 1]}");
+                        //menu.RegisterSimpleOption(ModManifest, index.Key, "Item that drops", () => Config.ResourceDrops[index.Key].Drops[j, 0], (int val) => Config.ResourceDrops[index.Key].Drops[j, 0] = val);
+                        //menu.RegisterSimpleOption(ModManifest, index.Key, "Amount that drops", () => Config.ResourceDrops[index.Key].Drops[j, 1], (int val) => Config.ResourceDrops[index.Key].Drops[j, 1] = val);
+                    }
+                }
+            }
+            */
         }
 
         /// <summary>
@@ -250,6 +275,8 @@ namespace MoreHardwood
                     return "PalmTree";
                 case 7:
                     return "MushroomTree";
+                case 8:
+                    return "MahoganyTree";
                 case 600:
                     return "LargeStump";
                 case 602:
@@ -855,4 +882,27 @@ namespace MoreHardwood
         }
 
     }
+}
+
+//Avoid missing reference
+public interface GenericModConfigMenuAPI
+{
+    void RegisterModConfig(IManifest mod, Action revertToDefault, Action saveToFile);
+
+    void RegisterLabel(IManifest mod, string labelName, string labelDesc);
+    void RegisterSimpleOption(IManifest mod, string optionName, string optionDesc, Func<bool> optionGet, Action<bool> optionSet);
+    void RegisterSimpleOption(IManifest mod, string optionName, string optionDesc, Func<int> optionGet, Action<int> optionSet);
+    void RegisterSimpleOption(IManifest mod, string optionName, string optionDesc, Func<float> optionGet, Action<float> optionSet);
+    void RegisterSimpleOption(IManifest mod, string optionName, string optionDesc, Func<string> optionGet, Action<string> optionSet);
+    void RegisterSimpleOption(IManifest mod, string optionName, string optionDesc, Func<SButton> optionGet, Action<SButton> optionSet);
+
+    void RegisterClampedOption(IManifest mod, string optionName, string optionDesc, Func<int> optionGet, Action<int> optionSet, int min, int max);
+    void RegisterClampedOption(IManifest mod, string optionName, string optionDesc, Func<float> optionGet, Action<float> optionSet, float min, float max);
+
+    void RegisterChoiceOption(IManifest mod, string optionName, string optionDesc, Func<string> optionGet, Action<string> optionSet, string[] choices);
+
+    void RegisterComplexOption(IManifest mod, string optionName, string optionDesc,
+                               Func<Vector2, object, object> widgetUpdate,
+                               Func<SpriteBatch, Vector2, object, object> widgetDraw,
+                               Action<object> onSave);
 }
