@@ -1,10 +1,10 @@
 ﻿{
   "Name": "MoreHardwood",
   "Author": "Plastikmensch",
-  "Version": "1.1.2",
+  "Version": "1.2.0",
   "Description": "Configurable drops",
   "UniqueID": "Plastikmensch.MoreHardwood",
   "EntryDll": "MoreHardwood.dll",
-  "MinimumApiVersion": "2.10.0",
+  "MinimumApiVersion": "3.0.0",
   "UpdateKeys": [ "Github:Plastikmensch/MoreHardwood" ]
 }
